@@ -1,7 +1,7 @@
 ## Diving School Database Frontend App with Python, Tkinter, PostgreSQL
 * Folder organization:
     * On main page there are two python files: the first is the main file **script.py** for running the app. The second is **backend.py** providing connection of the frontend to PostgreSQL database.
-    * In the folder `app` there are other python files related to database tables. They are **student.py, program.py, group.py, trainer.py**
+    * In the folder **app** there are other python files related to database tables. They are **student.py, program.py, group.py, trainer.py**
 * IMPORTANT: Portable database is yet to be included so many functions are not runnable yet.
 
 ## Instructions on how to run the app on local:
