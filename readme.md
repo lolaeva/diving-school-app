@@ -6,12 +6,12 @@
 
 ## Instructions on how to run the app on local:
 To run on your local machine:
-1. Install Python 3.8.1
+1. Check if Python is installed by typing in command prompt `python`. The version of python on which this app is developed is Python 3.8.1.
 2. Create a virtualenv "venv" with `python -m venv virtual`. If you do not have
-    virtualenv python package installed type `pip install virtualenv`. Your
-    virtual environment folder is now **virtualenv**.
-3. Activate virtual environment with `source virtual/Scripts/activate`
-4. Install the requirements with `pip install -r requirements.txt`
-5. Run the application with `python script.py`
+    virtualenv python package installed type `pip install virtualenv`. If pip is not installed, do so by `python get-pip.py`.
+    Your virtual environment folder is now **virtualenv**.
+3. Activate virtual environment with `source virtual/Scripts/activate`.
+4. Install the requirements with `pip install -r requirements.txt`.
+5. Run the application with `python script.py`.
 6. If you install new packages during app development, add those to requirement.txt file 
-   by `pip freeze > requirements.txt`
+   by `pip freeze > requirements.txt`.
