@@ -1,3 +1,7 @@
 virtual
 __pycache__
 .vscode
+build
+dist 
+script.spec
+PostgreSQL

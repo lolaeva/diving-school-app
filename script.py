@@ -3,6 +3,7 @@ Author: Lola
 Date: Dec 2020
 An app that stores and modifies simplified company database
 """
+import os
 import psycopg2
 from tkinter import *
 from tkinter.ttk import *
@@ -69,6 +70,7 @@ class DatabaseWindow:
 # **********************************************************************
 # Tkinter Window
 # **********************************************************************
-window = Tk()
-comp_app = MainWindow(window)
-window.mainloop() 
+if __name__ == "__main__":
+  window = Tk()
+  comp_app = MainWindow(window)
+  window.mainloop() 

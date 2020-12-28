@@ -2,7 +2,6 @@
 * Folder organization:
     * On main page there are two python files: the first is the main file **script.py** for running the app. The second is **backend.py** providing connection of the frontend to PostgreSQL database.
     * In the folder **app** there are other python files related to database tables. They are **student.py, program.py, group.py, trainer.py**
-* IMPORTANT: Portable database is yet to be included so many functions are not runnable yet.
 
 ## Instructions on how to run the app on local:
 To run on your local machine:
@@ -15,3 +14,22 @@ To run on your local machine:
 5. Run the application with `python script.py`.
 6. If you install new packages during app development, add those to requirement.txt file 
    by `pip freeze > requirements.txt`.
+
+## PotgreSQL to Heroku
+* On Windows: ***Remember to update your PATH environment variable to add the bin directory of your Postgres installation. The directory will be similar to this: `C:\Program Files\PostgreSQL\<VERSION>\bin`. If you forget to update your PATH, commands like heroku pg:psql won’t work.***
+* Push:
+    ```
+    heroku pg:push diving_school 'DATABASE_URL' --app divingschooldb
+    ```
+* Troubleshooting:
+    ```
+    pg_dump -f diving_school.dump -Fc --no-acl -no-owner -h localhost -U postgres --schema=public diving_school
+
+    heroku config:get DATABASE_URL --app divingschooldb
+
+    pg_restore --verbose --no-acl --no-owner -U lmgcolusndmjrc -h ec2-3-233-206-99.compute-1.amazonaws.com -p 5432 -d dfie71fcq48391 < diving_school.dump
+    ```
+* Connecting in Python
+    ```
+    pip install psycopg2-binary
+    ```

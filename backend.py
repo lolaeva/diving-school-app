@@ -2,16 +2,37 @@
 connects to PostgreSQL database and returns queries
 in functions which are then called in script.py
 '''
+import os
+import urllib.parse as urlparse
 import psycopg2
 from tkinter import *
 from tkinter.ttk import *
 
-postgresql_conn = "dbname='diving_school' user='postgres' password='postgres123' host='localhost' port='5432'"
+os.environ['DATABASE_URL'] = 'postgres://lmgcolusndmjrc:1c7860f3bdf2100c9137dea9692adfe15be2ec97eaaa5cb3411aa6c151d80008@ec2-3-233-206-99.compute-1.amazonaws.com:5432/dfie71fcq48391'
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+# url = urlparse.urlparse(os.environ['DATABASE_URL'])
+# dbname = url.path[1:]
+# user = url.username
+# password = url.password
+# host = url.hostname
+# port = url.port
+
+# DATABASE_URL = psycopg2.connect(
+#             dbname=dbname,
+#             user=user,
+#             password=password,
+#             host=host,
+#             port=port
+#             )
+# # DATABASE_URL = psycopg2.connect(DATABASE_URL, sslmode='require')
+
+# DATABASE_URL = "dbname='diving_school' user='postgres' password='postgres123' host='localhost' port='5432'"
 
 # *********************************************
 # ****************** STUDENT ******************
 def showStd():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT tc_no, fname, lname, bdate, level, ref_no FROM student ORDER BY fname'
   cur.execute(query)
@@ -21,7 +42,7 @@ def showStd():
   return rows
 
 def deleteStd(tc):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'DELETE FROM student WHERE tc_no=%s'
   cur.execute(query, (tc,))
@@ -31,7 +52,7 @@ def deleteStd(tc):
   # return message
 
 def getTrnNo(fname,lname):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT tc_no FROM trainer WHERE fname=%s AND lname=%s'
   cur.execute(query, (fname,lname))
@@ -42,7 +63,7 @@ def getTrnNo(fname,lname):
   return res[0][0]
 
 def updateStd(std):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'UPDATE student \
            SET tc_no=%s, fname=%s, lname=%s, bdate=%s, level=%s, ref_no=%s \
@@ -54,7 +75,7 @@ def updateStd(std):
   # return message
 
 def getTrnName():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT fname, lname FROM trainer'
   cur.execute(query,())
@@ -65,7 +86,7 @@ def getTrnName():
   return [f'{a} {b}' for a,b in rows] 
 
 def getStdLevel():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT DISTINCT level FROM student ORDER BY level'
   cur.execute(query,())
@@ -76,7 +97,7 @@ def getStdLevel():
   return [val[0] for val in rows]
 
 def insertStd(std):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'INSERT INTO student VALUES(%s,%s,%s,%s,%s,(SELECT t.tc_no FROM trainer t WHERE t.fname=%s AND t.lname=%s))'
   cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[6]))
@@ -88,7 +109,7 @@ def insertStd(std):
 # *********************************************************************************************
 # ********************************** TRAINER *************************************************
 def showTrn():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT tc_no, fname, lname, salary, level, commission FROM trainer ORDER BY fname'
   cur.execute(query)
@@ -98,7 +119,7 @@ def showTrn():
   return rows
 
 def deleteTrn(tc):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'DELETE FROM trainer WHERE tc_no=%s'
   cur.execute(query, (tc,))
@@ -108,7 +129,7 @@ def deleteTrn(tc):
   # return message
 
 def getTrnLevel():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT DISTINCT level FROM trainer ORDER BY level'
   cur.execute(query,())
@@ -119,7 +140,7 @@ def getTrnLevel():
   return [val[0] for val in rows]
 
 def updateTrn(trn):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   trn = [None if i == 'None' or i == '' else i for i in trn]
   query = 'UPDATE trainer SET tc_no=%s,fname=%s,lname=%s,salary=%s,level=%s,commission=%s \
@@ -130,7 +151,7 @@ def updateTrn(trn):
 
 
 def insertTrn(trn):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   trn = [None if i == 'None' or i == '' else i for i in trn]
   query = 'INSERT INTO trainer VALUES(%s,%s,%s,%s,%s,%s)'
@@ -144,7 +165,7 @@ def insertTrn(trn):
 # **********************************************************************
 # ****************************** PROGRAM *******************************
 def showPrg():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT program_id, program_name, min_stu_level, \
     min_trn_level, price FROM prg ORDER BY program_id'
@@ -155,7 +176,7 @@ def showPrg():
   return rows
 
 def deletePrg(id):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'DELETE FROM prg WHERE program_id=%s'
   cur.execute(query, (id,))
@@ -165,7 +186,7 @@ def deletePrg(id):
   # return message
 
 def updatePrg(prg):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   prg = [None if len(i) < 0 or i == 'None' else i for i in prg]
   query = 'UPDATE prg SET program_id=%s, program_name=%s,\
@@ -178,7 +199,7 @@ def updatePrg(prg):
   # return message
 
 def insertPrg(prg):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   prg = [i if len(i)>0 or i!='None' else None for i in prg]
   query = 'INSERT INTO prg VALUES(%s,%s,%s,%s,%s)'
@@ -189,7 +210,7 @@ def insertPrg(prg):
   # return message
 
 def showPrgInfo(prg_id):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT g.group_id\
            FROM prg p, grp g WHERE p.program_id = g.program_id AND p.program_id=%s \
@@ -204,7 +225,7 @@ def showPrgInfo(prg_id):
 # *******************************************************************
 # ************************* GROUP ***********************************
 def showGrp():
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT group_id, program_id, trainer_no, day_of_week\
            FROM grp ORDER BY group_id'
@@ -215,7 +236,7 @@ def showGrp():
   return rows
 
 def deleteGrp(id):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'DELETE FROM grp WHERE group_id=%s'
   cur.execute(query, (id,))
@@ -225,7 +246,7 @@ def deleteGrp(id):
   # return message
 
 def updateGrp(grp):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   grp = [None if len(i) < 0 or i == 'None' else i for i in grp]
   query = 'UPDATE grp SET group_id=%s, program_id=%s, day_of_week=%s, trainer_no=%s WHERE group_id=%s'
@@ -237,7 +258,7 @@ def updateGrp(grp):
   # return message
 
 def insertGrp(grp):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   grp = [i if len(i)>0 or i!='None' else None for i in grp]
   query = 'INSERT INTO grp VALUES(%s,%s,(SELECT t.tc_no FROM trainer t WHERE t.fname=%s AND t.lname=%s),%s)'
@@ -248,7 +269,7 @@ def insertGrp(grp):
   # return message
 
 def showGrpInfo(grp_id):
-  conn = psycopg2.connect(postgresql_conn)
+  conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT t.fname, t.lname\
            FROM trainer t, grp g WHERE g.trainer_no = t.tc_no AND g.group_id=%s'
