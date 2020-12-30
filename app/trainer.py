@@ -10,7 +10,7 @@ class Trainer:
     # TRAINER DATABASE
     self.master = master
     self.tree_title = Label(master, text='Egitmen Tablosu')
-    b_width = 22
+    b_width = 20
     b1 = Button(master, text='Ekle', width=b_width, command=lambda: self.openTrnWindow(1))
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: [self.openTrnWindow(2), self.fillEntries()])
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteTrn())
@@ -49,9 +49,9 @@ class Trainer:
 
   def toggle(self, buttons, tree_win):
     if self.hidden:
-      tree_win[0].grid(row=5, column=1, columnspan=4, rowspan=4, sticky='nsew')
-      tree_win[1].grid(row=2, column=1, columnspan=3, sticky='sw')
-      tree_win[2].grid(row=5, column=5, sticky='ns')
+      tree_win[0].grid(row=5, column=1, columnspan=5, rowspan=4, sticky='nsew')
+      tree_win[1].grid(row=2, column=1, sticky='sw')
+      tree_win[2].grid(row=5, column=6, sticky='ns')
       for i in range(3):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
     else:

@@ -5,3 +5,4 @@ build
 dist 
 script.spec
 PostgreSQL
+diving_school.dump

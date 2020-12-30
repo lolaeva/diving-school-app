@@ -5,7 +5,7 @@ from tkinter.ttk import *
 from tkinter import simpledialog
 from tkinter import messagebox
 
-class Group:
+class GroupStd:
   def __init__(self, master):
     self.master = master
     self.tree_title = Label(master, text='Grup Tablosu')
@@ -76,7 +76,7 @@ class Group:
     return self.checkSelectResult
 
   # ******************* VIEW TABLE ************************
-  def viewGrp(self):
+  def viewGrpStd(self):
     self.tree.delete(*self.tree.get_children())       # empty table on every execution
     for row in backend.showGrp():
       self.tree.insert('', END, values=row)

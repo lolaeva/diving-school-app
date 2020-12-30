@@ -9,7 +9,7 @@ class Program:
   def __init__(self, master):
     self.master = master
     self.tree_title = Label(master, text='Program Tablosu')
-    b_width = 22
+    b_width = 20
     b1 = Button(master, text='Ekle', width=b_width, command=lambda: self.openPrgWindow(1))
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: [self.openPrgWindow(2), self.fillEntries()])
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deletePrg())
@@ -24,13 +24,13 @@ class Program:
     self.tree['columns'] = ("1", "2", "3", "4", "5") 
     self.tree.heading('#1', text='Program ID')
     self.tree.heading('#2', text='Program Adi')
-    self.tree.heading('#3', text='Min Ogrenci Seviye')
-    self.tree.heading('#4', text='Max Ogrenci Seviye')
-    self.tree.heading('#5', text='Ucret')
+    self.tree.heading('#3', text='Ucret')
+    self.tree.heading('#4', text='Min Egitmen Seviye')
+    self.tree.heading('#5', text='Min Ogrenci Seviye')
     self.tree.column('1', width = 60)
     self.tree.column('2', width = 60)
     self.tree.column('3', width = 80)
-    self.tree.column('4', width = 80)
+    self.tree.column('4', width = 40)
     self.tree.column('5', width = 40)
     self.style_tree = Style()
     self.style_tree.configure('Treeview', rowheight=20)
@@ -48,9 +48,9 @@ class Program:
 
   def toggle(self, buttons, tree_win, infos):
     if self.hidden:
-      tree_win[0].grid(row=5, column=1, columnspan=4, rowspan=4, sticky='nsew')
-      tree_win[1].grid(row=2, column=1, columnspan=3, sticky='sw')
-      tree_win[2].grid(row=5, column=5, sticky='ns')
+      tree_win[0].grid(row=5, column=1, columnspan=5, rowspan=4, sticky='nsew')
+      tree_win[1].grid(row=2, column=1, sticky='sw')
+      tree_win[2].grid(row=5, column=6, sticky='ns')
       for i in range(3):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
       for i in range(4):
@@ -84,10 +84,10 @@ class Program:
     current_item = self.tree.item(self.tree.focus())
     self.prg_id = current_item['values'][0]
     self.prg_name = current_item['values'][1]
-    self.min_std_level = current_item['values'][2]
+    self.price = current_item['values'][2]
     self.min_trn_level = current_item['values'][3]
-    self.price = current_item['values'][4]
-    prg_grp = [i for i in backend.showPrgInfo(self.prg_id)]
+    self.min_std_level = current_item['values'][4]
+    prg_grp = [str(i) for i in backend.showPrgInfo(self.prg_id)]
     self.t2.config(text=' ,'.join(prg_grp))
     self.t1.config(text=self.prg_id)
 
@@ -101,9 +101,9 @@ class Program:
   def getEntryValues(self):
     prg_id = self.prg_id_text.get()
     prg_name = self.prg_name_text.get()
-    min_std_level = self.min_std_level_text.get()
-    min_trn_level = self.min_trn_level_text.get()
     price = self.price_text.get()
+    min_trn_level = self.min_trn_level_text.get()
+    min_std_level = self.min_std_level_text.get()
     return [prg_id, prg_name, min_std_level, min_trn_level, price]
 
   def insertPrg(self):
@@ -175,20 +175,24 @@ class Program:
     self.prg_name_text=StringVar()
     self.prg_name_entry = Entry(self.new_window,textvariable=self.prg_name_text,width=entry_width)
     self.prg_name_entry.grid(row=2, column=2, sticky="nsew")
-    students = backend.getStdLevel()
-    l3 = Label(self.new_window, text='Min Ogrenci Seviye: ').grid(row=3, column=1, sticky='w')
-    self.min_std_level_text  = StringVar(self.new_window)
-    self.min_std_level_text.set(students[0])
-    self.min_std_level_entry = OptionMenu(self.new_window, self.min_std_level_text, students[0], *students)
-    self.min_std_level_entry.grid(row=3, column=2, sticky="nsew")
+
+    l3 = Label(self.new_window, text='Ucret: ').grid(row=3, column=1, sticky='w')
+    self.price_text=StringVar(self.new_window)
+    self.price_entry = Entry(self.new_window,textvariable=self.price_text, width=entry_width)
+    self.price_entry.grid(row=3, column=2, sticky="nsew")
+    
     trainers = backend.getTrnLevel()
     l4 = Label(self.new_window, text='Min Egitmen Seviye: ').grid(row=4, column=1, sticky='w')
     self.min_trn_level_text  = StringVar(self.new_window)
     self.min_trn_level_text.set(trainers[0])
     self.min_trn_level_entry = OptionMenu(self.new_window, self.min_trn_level_text, trainers[0], *trainers)
     self.min_trn_level_entry.grid(row=4, column=2, sticky="nsew")
-    l5 = Label(self.new_window, text='Ucret: ').grid(row=5, column=1, sticky='w')
-    self.price_text=StringVar(self.new_window)
-    self.price_entry = Entry(self.new_window,textvariable=self.price_text, width=entry_width)
-    self.price_entry.grid(row=5, column=2, sticky="nsew")
+    
+    students = backend.getStdLevel()
+    l5 = Label(self.new_window, text='Min Ogrenci Seviye: ').grid(row=5, column=1, sticky='w')
+    self.min_std_level_text  = StringVar(self.new_window)
+    self.min_std_level_text.set(students[0])
+    self.min_std_level_entry = OptionMenu(self.new_window, self.min_std_level_text, students[0], *students)
+    self.min_std_level_entry.grid(row=5, column=2, sticky="nsew")
+    
    
