@@ -7,6 +7,7 @@ import urllib.parse as urlparse
 import psycopg2
 from tkinter import *
 from tkinter.ttk import *
+import datetime
 
 # os.environ['DATABASE_URL'] = 'postgres://lmgcolusndmjrc:1c7860f3bdf2100c9137dea9692adfe15be2ec97eaaa5cb3411aa6c151d80008@ec2-3-233-206-99.compute-1.amazonaws.com:5432/dfie71fcq48391'
 # DATABASE_URL = os.environ.get('DATABASE_URL')
@@ -28,6 +29,22 @@ from tkinter.ttk import *
 # # DATABASE_URL = psycopg2.connect(DATABASE_URL, sslmode='require')
 
 DATABASE_URL = "dbname='dalis_okulu_vt' user='postgres' password='postgres123' host='localhost' port='5432'"
+
+
+# *********************************************
+# ****************** VIEW ******************
+def view():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = "SELECT grup_id, program_adi, gun, egitmeni FROM yaklasan_etkinlikler\
+          WHERE gun_rakam IN %s ORDER BY gun_rakam;"
+  today = datetime.datetime.today().weekday()
+  next_days = (str(today), str((today+1)%7), str((today+2)%7))
+  cur.execute(query, (next_days,))
+  rows = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return rows
 
 # *********************************************
 # ****************** STUDENT ******************
@@ -250,7 +267,6 @@ def updateGrp(grp):
   grp = [None if len(i) < 0 or i == 'None' else i for i in grp]
   query = 'UPDATE grup SET grup_id=%s, program_id=%s, gun=%s, egitmen_no=%s WHERE grup_id=%s'
   cur.execute(query, (grp[0], grp[1], grp[2], grp[3], grp[0]))
-  print(grp)
   # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
@@ -278,3 +294,112 @@ def showGrpInfo(grp_id):
   conn.commit()
   conn.close()
   return res[0]
+
+
+# **************************************************************************
+# ************************* GRUP STUDENT ***********************************
+def showGrpStd():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT grup_id, ogrenci_no\
+           FROM grup_ogr ORDER BY grup_id'
+  cur.execute(query)
+  rows = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return rows
+
+def insertGrpStd(grp_std):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'INSERT INTO grup_ogr VALUES(%s,(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s))'
+  cur.execute(query, (grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1]))
+  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
+  conn.commit()
+  conn.close()
+
+def deleteGrpStd(id):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'DELETE FROM grup_ogr WHERE grup_id=%s'
+  cur.execute(query, (id,))
+  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
+  conn.commit()
+  conn.close()
+  # return message
+
+def updateGrpStd(grp_std):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  print(grp_std)
+  query = 'UPDATE grup_ogr SET grup_id=%s, \
+    ogrenci_no=(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s) WHERE grup_id=%s'
+  cur.execute(query, (grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1], grp_std[2]))
+  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
+  conn.commit()
+  conn.close()
+  # return message
+
+def noGrpStd():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = "SELECT ad, soyad, tc_kimlik_no FROM ogrenci\
+          EXCEPT\
+          SELECT ad, soyad, ogrenci_no FROM ogrenci, grup_ogr\
+          WHERE ogrenci_no = tc_kimlik_no;"
+  cur.execute(query)
+  rows = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return rows
+
+def getStdCount(group_id):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT COUNT(*) FROM grup_ogr \
+           WHERE grup_id=%s GROUP BY grup_id'
+  cur.execute(query, (group_id,))
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return res
+
+def getStdName(std_no):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT ad, soyad FROM ogrenci WHERE tc_kimlik_no=%s'
+  cur.execute(query, (str(std_no),))
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return res[0]
+
+def getAllStdInfo(level):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT ad, soyad FROM ogrenci WHERE seviye=%s'
+  cur.execute(query, (level))
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return [i[0]+' '+i[1] for i in res]
+
+def getAllStd():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT ad, soyad FROM ogrenci ORDER BY ad'
+  cur.execute(query)
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return [i[0]+' '+i[1] for i in res]
+
+def getAllGrpId():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT grup_id FROM grup'
+  cur.execute(query)
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return [i[0] for i in res]

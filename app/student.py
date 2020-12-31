@@ -18,7 +18,7 @@ class Student:
     self.buttons = [b1, b2, b3]
     # TREEVIEW (TABLE)
     master.grid_rowconfigure(4, minsize=10)  # leave an empty row
-    # self.tree_title = Label(master, text='Ogrenciler')
+    self.tree_title = Label(master, text='Ogrenciler')
     self.tree = Treeview(master, show='headings')
     self.tree['columns'] = ("1", "2", "3", "4", "5", "6") 
     self.tree.heading('#1', text='TC Kimlik No')

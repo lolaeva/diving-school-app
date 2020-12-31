@@ -22,7 +22,7 @@ class Group:
     self.t2 = Label(master, text='')
     self.infos = [i1,self.t1,i2,self.t2]
     # TREEVIEW
-    # self.tree_title = Label(master, text='Ogrenciler')
+    self.tree_title = Label(master, text='Ogrenciler')
     self.tree = Treeview(master, show='headings')
     self.tree['columns'] = ("1", "2", "3", "4") 
     self.tree.heading('#1', text='Grup ID')
