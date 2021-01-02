@@ -111,7 +111,6 @@ class Trainer:
     self.fname_entry  = ''
     self.lname_entry  = ''
     self.salary_entry = ''
-    self.level_entry  = ''
     self.coms_entry   = ''
     try:
       entry_values = self.getEntryValues()

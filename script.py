@@ -134,13 +134,13 @@ class MainWindow:
 
 
   def view(self):
-    self.tree.delete(*self.tree.get_children())       # empty table on every execution
+    self.tree.delete(*self.tree.get_children())      
     for row in backend.view():
       self.tree.insert('', END, values=row)
 
   def having(self):
-    self.tree2.delete(*self.tree2.get_children())       # empty table on every execution
-    for row in backend.having():
+    self.tree2.delete(*self.tree2.get_children())       
+    for row in backend.getTrnStdCount():
       self.tree2.insert('', END, values=row)
 
   def new_window(self, level_no, _class):

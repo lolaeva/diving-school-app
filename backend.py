@@ -1,38 +1,28 @@
 '''
 connects to PostgreSQL database and returns queries
 in functions which are then called in script.py
+Requirements are in:
+ * VIEW     -
+ * EXCEPT   - noGrpStd
+ * HAVING   -
+ * Function 1 - 
+ * Function 2 - 
+ * Function 3 - with cursor
+ * Trigger 1  - 
+ * Trigger 2  -
+
 '''
 import os
-import urllib.parse as urlparse
 import psycopg2
 from tkinter import *
 from tkinter.ttk import *
 import datetime
 
-# os.environ['DATABASE_URL'] = 'postgres://lmgcolusndmjrc:1c7860f3bdf2100c9137dea9692adfe15be2ec97eaaa5cb3411aa6c151d80008@ec2-3-233-206-99.compute-1.amazonaws.com:5432/dfie71fcq48391'
-# DATABASE_URL = os.environ.get('DATABASE_URL')
-
-# url = urlparse.urlparse(os.environ['DATABASE_URL'])
-# dbname = url.path[1:]
-# user = url.username
-# password = url.password
-# host = url.hostname
-# port = url.port
-
-# DATABASE_URL = psycopg2.connect(
-#             dbname=dbname,
-#             user=user,
-#             password=password,
-#             host=host,
-#             port=port
-#             )
-# # DATABASE_URL = psycopg2.connect(DATABASE_URL, sslmode='require')
-
 DATABASE_URL = "dbname='dalis_okulu_vt' user='postgres' password='postgres123' host='localhost' port='5432'"
 
-
-# **************************************************************************************
-# ************************* MAIN WINDOW VIEW and HAVING *********************************
+''' **************************************************************************************
+    ************************* MAIN WINDOW VIEW and HAVING *********************************
+'''
 def view():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
@@ -46,7 +36,7 @@ def view():
   conn.close()
   return rows
 
-def having():
+def getTrnStdCount():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = "SELECT ad, soyad, COUNT(ogrenci_no) AS ogrenci_sayisi\
@@ -61,8 +51,9 @@ def having():
   conn.close()
   return rows
 
-# *********************************************
-# ****************** STUDENT ******************
+''' *********************************************
+    ****************** STUDENT ******************
+ '''
 def showStd():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
@@ -111,7 +102,6 @@ def getTrnName():
   cur = conn.cursor()
   query = 'SELECT ad, soyad FROM egitmen'
   cur.execute(query,())
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   rows = cur.fetchall()
   conn.commit()
   conn.close()
@@ -138,8 +128,9 @@ def insertStd(std):
   conn.close()
   # return message
 
-# *********************************************************************************************
-# ********************************** egitmen *************************************************
+''' *********************************************************************************************
+     ********************************** TRAINER *************************************************
+'''
 def showTrn():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
@@ -153,19 +144,25 @@ def showTrn():
 def deleteTrn(tc):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'DELETE FROM egitmen WHERE tc_kimlik_no=%s'
+  query = 'SELECT EGITMEN_DELETE(%s);'  # function to check trainer
   cur.execute(query, (tc,))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
-  conn.commit()
-  conn.close()
-  # return message
-
+  rows = cur.fetchall()
+  if rows[0][0] != None: # If function result is not null, call function result
+    conn.commit()
+    conn.close()
+    return rows[0][0]
+  else:                 # else resume deleting
+    query = 'DELETE FROM egitmen WHERE tc_kimlik_no = %s;'
+    cur.execute(query, (tc,))
+    conn.commit()
+    conn.close()
+    return 'Egimen Silindi'
+    
 def getTrnLevel():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT DISTINCT seviye FROM egitmen ORDER BY seviye'
   cur.execute(query,())
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   rows = cur.fetchall()
   conn.commit()
   conn.close()
@@ -180,22 +177,22 @@ def updateTrn(trn):
   cur.execute(query, (trn[0], trn[1], trn[2], trn[3], trn[4], trn[5], trn[0]))
   conn.commit()
   conn.close()
-
+  return 'Egitmen Guncellendi'
 
 def insertTrn(trn):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   trn = [None if i == 'None' or i == '' else i for i in trn]
   query = 'INSERT INTO egitmen VALUES(%s,%s,%s,%s,%s,%s)'
-  cur.execute(query, (trn[0],trn[1],trn[2],trn[3],trn[4],trn[5]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
+  cur.execute(query, (trn[0],trn[1],trn[2],trn[4],trn[3],trn[5]))
   conn.commit()
   conn.close()
-  # return message
+  return 'Egitmen Eklendi'
 
 
-# **********************************************************************
-# ****************************** PROGRAM *******************************
+''' *********************************************************************************************************
+    ****************************************** PROGRAM *****************************************************
+ '''
 def showPrg():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
@@ -211,10 +208,9 @@ def deletePrg(id):
   cur = conn.cursor()
   query = 'DELETE FROM program WHERE program_id=%s'
   cur.execute(query, (id,))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Program silindi'
 
 def updatePrg(prg):
   conn = psycopg2.connect(DATABASE_URL)
@@ -224,10 +220,9 @@ def updatePrg(prg):
            min_egt_seviye=%s, min_ogr_seviye=%s\
            WHERE program_id=%s'
   cur.execute(query, (prg[0],prg[1],prg[2],prg[3],prg[4],prg[0]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Program Guncellendi'
 
 def insertPrg(prg):
   conn = psycopg2.connect(DATABASE_URL)
@@ -235,10 +230,9 @@ def insertPrg(prg):
   prg = [i if len(i)>0 or i!='None' else None for i in prg]
   query = 'INSERT INTO program VALUES(%s,%s,%s,%s,%s)'
   cur.execute(query, (prg[0],prg[1],prg[2],prg[3],prg[4]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Program Eklendi'
 
 def showPrgInfo(prg_id):
   conn = psycopg2.connect(DATABASE_URL)
@@ -248,13 +242,23 @@ def showPrgInfo(prg_id):
            ORDER BY p.program_id'
   cur.execute(query, (prg_id,))
   res = cur.fetchall()
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
   return [i[0] for i in res]
 
-# *********************************************************************************************
-# ********************************* GRUP ***************************************************
+def getTotalPrice(prg_id):
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT PROGRAM_ODENEN_UCRET(%s);'
+  cur.execute(query, (prg_id,))
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return res
+
+''' *****************************************************************************************************
+    ******************************************* GRUP ***************************************************
+'''
 def showGrp():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
@@ -271,10 +275,9 @@ def deleteGrp(id):
   cur = conn.cursor()
   query = 'DELETE FROM grup WHERE grup_id=%s'
   cur.execute(query, (id,))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Grup Silindi'
 
 def updateGrp(grp):
   conn = psycopg2.connect(DATABASE_URL)
@@ -282,10 +285,9 @@ def updateGrp(grp):
   grp = [None if len(i) < 0 or i == 'None' else i for i in grp]
   query = 'UPDATE grup SET grup_id=%s, program_id=%s, gun=%s, egitmen_no=%s WHERE grup_id=%s'
   cur.execute(query, (grp[0], grp[1], grp[2], grp[3], grp[0]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Grup Guncellendi'
 
 def insertGrp(grp):
   conn = psycopg2.connect(DATABASE_URL)
@@ -293,21 +295,24 @@ def insertGrp(grp):
   grp = [i if len(i)>0 or i!='None' else None for i in grp]
   query = 'INSERT INTO grup VALUES(%s,%s,(SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s),%s)'
   cur.execute(query, (grp[0], grp[1], grp[3], grp[4], grp[2]))
-  message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  return message
+  return 'Grup Eklendi'
 
-def showGrpInfo(grp_id):
+def getTrnNameSalary(grp_id):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'SELECT e.ad, e.soyad\
-           FROM egitmen e, grup g WHERE g.egitmen_no = e.tc_kimlik_no AND g.grup_id=%s'
-  cur.execute(query, (grp_id,))
+  query0 = 'SELECT e.tc_kimlik_no FROM egitmen e, grup g\
+           WHERE g.egitmen_no = e.tc_kimlik_no AND g.grup_id=%s;'
+  cur.execute(query0, (grp_id,))
   res = cur.fetchall()
+  query1 = 'SELECT EGITMEN_MAAS(%s);'
+  cur.execute(query1, (str(res[0][0]),))
+  salary = cur.fetchall()
+  msg = conn.notices[0]
   conn.commit()
   conn.close()
-  return res[0]
+  return msg[9:]
 
 def getPrgName(grp_id):
   conn = psycopg2.connect(DATABASE_URL)
@@ -321,8 +326,9 @@ def getPrgName(grp_id):
   return res[0]
 
 
-# *******************************************************************************
-# ************************* GRUP STUDENT ****************************************
+''' ****************************************************************************************************
+    ************************************ GRUP STUDENT **************************************************
+ '''
 def showGrpStd():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()

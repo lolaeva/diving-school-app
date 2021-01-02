@@ -18,9 +18,8 @@ class Group:
     self.buttons = [b1, b2, b3]
     i1 = Label(master, text='Dahil Oldugu Program: ')
     self.t1 = Label(master, text='')
-    i2 = Label(master, text='Egitmen Adi Soyadi: ')
     self.t2 = Label(master, text='')
-    self.infos = [i1,self.t1,i2,self.t2]
+    self.infos = [i1,self.t1,self.t2]
     # TREEVIEW
     self.tree_title = Label(master, text='Ogrenciler')
     self.tree = Treeview(master, show='headings')
@@ -40,7 +39,6 @@ class Group:
     self.sb = Scrollbar(master, orient ='vertical', command = self.tree.yview) 
     self.tree.configure(yscrollcommand = self.sb.set)
     self.tree_window = [self.tree, self.tree_title, self.sb]
-  
     # TOGGLE HIDE/ REVEAL
     self.hidden = True
   # when other table buttons are clicked, hide this table
@@ -50,17 +48,18 @@ class Group:
 
   def toggle(self, buttons, tree_win, infos):
     if self.hidden:
-      tree_win[0].grid(row=5, column=1, columnspan=5, rowspan=4, sticky='nsew')
+      tree_win[0].grid(row=6, column=1, columnspan=6, rowspan=4, sticky='nsew')
       tree_win[1].grid(row=2, column=1, sticky='sw')
-      tree_win[2].grid(row=5, column=6, sticky='ns')
+      tree_win[2].grid(row=6, column=6, sticky='ns')
       for i in range(3):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
-      for i in range(4):
+      for i in range(2):
         infos[i].grid(row=4, column=i+1, sticky='w')
+      infos[2].grid(row=5, column=1, columnspan=3, sticky='w')
     else:
       for i in range(3):
         buttons[i].grid_remove()
-      for i in range(4):
+      for i in range(3):
         infos[i].grid_remove()
       tree_win[0].grid_remove()
       tree_win[1].grid_remove()
@@ -88,8 +87,8 @@ class Group:
     self.prg_id = current_item['values'][1]
     self.trn_no = current_item['values'][2]
     self.day = current_item['values'][3]
-    grp_trn = ' '.join(list(backend.showGrpInfo(self.grp_id)))
-    self.t2.config(text=grp_trn)
+    # grp_trn = ' '.join(list(backend.showGrpInfo(self.grp_id)))
+    self.t2.config(text = backend.getTrnNameSalary(self.grp_id))
     self.t1.config(text=backend.getPrgName(self.grp_id))
 
   def fillEntries(self):

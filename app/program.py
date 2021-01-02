@@ -14,7 +14,7 @@ class Program:
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: [self.openPrgWindow(2), self.fillEntries()])
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deletePrg())
     self.buttons = [b1, b2, b3]
-    i1 = Label(master, text='Program: ')
+    i1 = Label(master, text='Toplam Odenen Ucret: ')
     self.t1 = Label(master, text='')
     i2 = Label(master, text='Bulunan Gruplar: ')
     self.t2 = Label(master, text='')
@@ -88,8 +88,8 @@ class Program:
     self.min_trn_level = current_item['values'][3]
     self.min_std_level = current_item['values'][4]
     prg_grp = [str(i) for i in backend.showPrgInfo(self.prg_id)]
-    self.t2.config(text=' ,'.join(prg_grp))
-    self.t1.config(text=self.prg_id)
+    self.t2.config(text = prg_grp)
+    self.t1.config(text = backend.getTotalPrice(self.prg_id))
 
   def fillEntries(self):
     if not self.checkSelectResult:
