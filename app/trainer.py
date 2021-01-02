@@ -15,6 +15,7 @@ class Trainer:
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: [self.openTrnWindow(2), self.fillEntries()])
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteTrn())
     self.buttons = [b1, b2, b3]
+    
     # TREEVIEW
     master.grid_rowconfigure(4, minsize=10)  # leave an empty row
     # self.tree_title = Label(master, text='Ogrenciler')

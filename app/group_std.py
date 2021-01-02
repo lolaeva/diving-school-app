@@ -15,8 +15,8 @@ class GroupStd:
     b1 = Button(master, text='Ekle', width=b_width, command=lambda: self.openGrpStdWindow(1))
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: self.openGrpStdWindow(2))
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteGrpStd())
-    b4 = Button(master, text='Grupsuz Ogrenciler', width=b_width, command=lambda: self.noGrpStd())
-    self.buttons = [b1, b2, b3, b4]
+
+    self.buttons = [b1, b2, b3]
     i1 = Label(master, text='Ogrenci Sayisi: ')
     self.t1 = Label(master, text='')
     i2 = Label(master, text='Ogrenci: ')
@@ -26,11 +26,15 @@ class GroupStd:
     # TREEVIEW
     self.tree_title = Label(master, text='Gruplardaki Ogrenciler')
     self.tree = Treeview(master, show='headings')
-    self.tree['columns'] = ("1", "2") 
+    self.tree['columns'] = ('1', '2', '3', '4') 
     self.tree.heading('#1', text='Grup ID')
-    self.tree.heading('#2', text='Ogrenci No')
-    self.tree.column('1', width = 60)
+    self.tree.heading('#2', text='Ogrenci Adi')
+    self.tree.heading('#3', text='Ogrenci Soyadi')
+    self.tree.heading('#4', text='Seviye')
+    self.tree.column('1', width = 20)
     self.tree.column('2', width = 60)
+    self.tree.column('3', width = 60)
+    self.tree.column('4', width = 20)
     self.style_tree = Style()
     self.style_tree.configure('Treeview', rowheight=20)
     self.tree.bind('<ButtonRelease-1>', self.selectGrpStdRow)
@@ -41,19 +45,20 @@ class GroupStd:
 
     self.tree2_title = Label(master, text='Grupsuz Ogrenciler')
     self.tree2 = Treeview(master, show='headings')
-    self.tree2['columns'] = ("1", "2", "3")
+    self.tree2['columns'] = ("1", "2", "3", "4")
     self.tree2.heading('#1', text='Ad')
     self.tree2.heading('#2', text='Soyad')
     self.tree2.heading('#3', text='Ogrenci No')
+    self.tree2.heading('#4', text='Seviye')
     self.tree2.column('1', width = 40)
     self.tree2.column('2', width = 40)
-    self.tree2.column('3', width = 60)
+    self.tree2.column('3', width = 40)
+    self.tree2.column('4', width = 20)
     self.style_tree2 = Style()
     self.style_tree2.configure('Treeview', rowheight=20)
     self.sb2 = Scrollbar(master, orient ='vertical', command = self.tree2.yview) 
     self.tree2.configure(yscrollcommand = self.sb2.set)
     self.tree2_window = [self.tree2, self.tree2_title, self.sb2]
-
     # TOGGLE HIDE/ REVEAL
     self.hidden = True
 
@@ -70,13 +75,13 @@ class GroupStd:
       tree2_win[0].grid(row=7, column=4, columnspan=2, rowspan=4, sticky='nsew')
       tree2_win[1].grid(row=6, column=4, sticky='sw')
       tree2_win[2].grid(row=7, column=6, sticky='nsw')
-      for i in range(4):
+      for i in range(3):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
       for i in range(2):
         infos[i].grid(row=i+4, column=2, sticky='w')
         labels[i].grid(row=i+4, column=1, sticky='w')
     else:
-      for i in range(4):
+      for i in range(3):
         buttons[i].grid_remove()
       for i in range(2):
         infos[i].grid_remove()
@@ -113,23 +118,25 @@ class GroupStd:
     # get row values on selection
     current_item = self.tree.item(self.tree.focus())
     self.grp_id = current_item['values'][0]
-    self.std_no = current_item['values'][1]
+    self.std_fname = current_item['values'][1]
+    self.std_lname = current_item['values'][2]
     std_count = backend.getStdCount(self.grp_id)
-    self.std_name  = ' '.join(list(backend.getStdName(self.std_no)))
+    self.std_fullname = self.std_fname + ' ' + self.std_lname
     self.t1.config(text=std_count)
-    self.t2.config(text=self.std_name)
+    self.t2.config(text=self.std_fullname)
     
   def getEntryValues(self):
-    grp_id = self.grp_text.get()
-    std_no = self.std_text.get()
-    return [grp_id, std_no]
+    g = self.grp_text.get()
+    s = self.std_text.get()
+    return [g, s]
   
   def insertGrpStd(self):
     try:
       entry_values = self.getEntryValues()
       query = backend.insertGrpStd(entry_values)
       messagebox.showinfo(parent=self.new_window, title='Success', message=query)
-      self.viewGrpStd()        
+      self.viewGrpStd()    
+      self.noGrpStd()         
       self.new_window.destroy()
     except Exception as e:
       messagebox.showerror(parent=self.new_window, title='Error', message=e)
@@ -139,21 +146,25 @@ class GroupStd:
       try:
         entry_values = self.getEntryValues()
         entry_values.append(self.grp_id)
+        entry_values.append(self.std_fname)
+        entry_values.append(self.std_lname)
         query = backend.updateGrpStd(entry_values)
         messagebox.showinfo(parent=self.new_window, title='Success', message=query)
-        self.viewGrpStd()        # update table view
+        self.viewGrpStd()
+        self.noGrpStd()
         self.new_window.destroy()
       except Exception as e:
         messagebox.showerror(parent=self.new_window, title='Error', message=e)
 
   def deleteGrpStd(self):
     if self.checkSelection(): 
-      confirm = messagebox.askyesno(parent=self.master, title='Grup siliniyor', message='Secilen grup silinsin mi?')
+      confirm = messagebox.askyesno(parent=self.master, title='Grup ogrenci siliniyor', message='Secilen gruptaki ogrenci silinsin mi?')
       if confirm == True:
         try:
-          query = backend.deleteGrpStd(self.tree.set(self.tree.selection())['1'])      #delete function in backend gets ssn as input
+          query = backend.deleteGrpStd(self.grp_id, self.std_fname, self.std_lname)      #delete function in backend gets ssn as input
           messagebox.showinfo(parent=self.master, title='Success', message=query)    #print trigger sql notice in messagebox
-          self.viewGrpStd()          # update table view
+          self.viewGrpStd()
+          self.noGrpStd()
           return 0
         except Exception as e:
           messagebox.showerror(parent=self.master, title='Error', message=e)
@@ -174,14 +185,14 @@ class GroupStd:
       self.new_window.title = txt
       l0 = Label(self.new_window, text=txt, font=(None, 12)).grid(row=0, column=1, sticky='w')
 
-    if button_id==1:          # set title depending on insert or update
+    if button_id==1:          
       title('Gruba Ogrenci Ekle')
       b1 = Button(self.new_window, text='Ekle', width=20, command=self.insertGrpStd).grid(row=7, column=1, sticky='nsew')
       b2 = Button(self.new_window, text='Iptal', width=20, command=self.new_window.destroy).grid(row=7, column=2, sticky='nsew')
       l1 = Label(self.new_window, text='Seviyedeki Ogrenciler: ').grid(row=3, column=1, sticky='w')
       def stdInfo(s):
         # update students option menu based on what is selected in level option
-        self.std = backend.getAllStdInfo(self.level_text.get())
+        self.std = backend.getAllStdByLevel(self.level_text.get())
         self.std_text = StringVar(self.new_window)
         self.std_text.set(self.std[0]) # default value
         self.std_entry = OptionMenu(self.new_window, self.std_text, self.std[0], *self.std)
@@ -193,13 +204,22 @@ class GroupStd:
       self.level_text.set('Seciniz') # default value
       self.level_entry = OptionMenu(self.new_window, self.level_text, 'Seciniz', *level, command=stdInfo)
       self.level_entry.grid(row=2, column=2, sticky="nsew")
-      
+
+      l3 = Label(self.new_window, text='Grubun Programi: ').grid(row=5, column=1, sticky='w')
+      self.prg_text = Label(self.new_window, text='')
+      def prgName(s):
+          # update students option menu based on what is selected in level option
+        self.prg = backend.getPrgName(self.grp_text.get())
+        self.prg_text.grid(row=5, column=2, sticky='w')
+        self.prg_text.config(text=backend.getPrgName(self.grp_text.get()))
+
       l2 = Label(self.new_window, text='Grup seciniz: ').grid(row=4, column=1, sticky='w')
       group_id = backend.getAllGrpId()
       self.grp_text = StringVar(self.new_window)
       self.grp_text.set('Seciniz') # default value
-      self.grp_entry = OptionMenu(self.new_window, self.grp_text, 'Seciniz', *group_id)
+      self.grp_entry = OptionMenu(self.new_window, self.grp_text, 'Seciniz', *group_id, command=prgName)
       self.grp_entry.grid(row=4, column=2, sticky="nsew")
+
     else:
       title('Grup Ogrenci Yenile')
       b1 = Button(self.new_window, text='Yenile', width=20, command=self.updateGrpStd).grid(row=7, column=1, sticky='nsew')
@@ -208,8 +228,8 @@ class GroupStd:
       l1 = Label(self.new_window, text='Ogrenci: ').grid(row=3, column=1, sticky='w')
       self.std = backend.getAllStd()
       self.std_text = StringVar(self.new_window)
-      self.std_text.set(self.std_name) # default value
-      self.std_entry = OptionMenu(self.new_window, self.std_text, self.std_name, *self.std)
+      self.std_text.set(self.std_fullname) # default value
+      self.std_entry = OptionMenu(self.new_window, self.std_text, self.std_fullname, *self.std)
       self.std_entry.grid(row=3, column=2, sticky="nsew")
       
       l2 = Label(self.new_window, text='Grup: ').grid(row=4, column=1, sticky='w')

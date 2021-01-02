@@ -16,7 +16,7 @@ class Group:
     b2 = Button(master, text='Guncelle', width=b_width, command=lambda: [self.openGrpWindow(2), self.fillEntries()])
     b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteGrp())
     self.buttons = [b1, b2, b3]
-    i1 = Label(master, text='Grup: ')
+    i1 = Label(master, text='Dahil Oldugu Program: ')
     self.t1 = Label(master, text='')
     i2 = Label(master, text='Egitmen Adi Soyadi: ')
     self.t2 = Label(master, text='')
@@ -90,7 +90,7 @@ class Group:
     self.day = current_item['values'][3]
     grp_trn = ' '.join(list(backend.showGrpInfo(self.grp_id)))
     self.t2.config(text=grp_trn)
-    self.t1.config(text=self.grp_id)
+    self.t1.config(text=backend.getPrgName(self.grp_id))
 
   def fillEntries(self):
     if not self.checkSelectResult:
