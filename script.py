@@ -1,6 +1,6 @@
 """
 Author: Lola Khudoyberdieva 
-Database Development: Ihsan Isik, Onur Can Erdem
+Database Development: Ihsan Isik, Onur Can Erdem, Furkan Necati Urkmez
 Date: Dec 2020
 An app that stores and modifies diving school database
 """
@@ -24,7 +24,7 @@ import datetime
 class MainWindow:
   def __init__(self, master):
     self.master = master
-    master.title('Öz Yıldız Dalış Okulu Bilgi Sistemi')
+    master.title('Öz Yıldız Dalış Okulu Bilgi Sistemi - Ana Sayfa')
     master.geometry('750x500')
     master.grid_columnconfigure(0, minsize=100)  # set leftmost column width
     master.grid_rowconfigure(0, minsize=20) 
@@ -34,9 +34,9 @@ class MainWindow:
     self.header = Label(master, text='Öz Yıldız Dalış Okulu Bilgi Sistemi', font=(None, 12)).grid(row=1, column=1, columnspan=3, sticky='w')
     self.header_button1 = Button(master, text='Bilgi Sistemi', width=20, command=lambda: self.new_window('2', DatabaseWindow))
     self.header_button1.grid(row=3, column=1, sticky='w')
-    self.header_button2 = Button(master, text='Yaklasan Etkinlikler', width=20, command=lambda: [self.toggle(1), self.view()])
+    self.header_button2 = Button(master, text='Yaklasan Etkinlikler', width=20, command=lambda: [self.toggle(1), self.upcomingPrg()])
     self.header_button2.grid(row=3, column=2, sticky='w')
-    self.header_button2 = Button(master, text='Egitmen Ogrencileri', width=20, command=lambda: [self.toggle(2), self.having()])
+    self.header_button2 = Button(master, text='Egitmen Ogrencileri', width=20, command=lambda: [self.toggle(2), self.trnStdCount()])
     self.header_button2.grid(row=3, column=3, sticky='w')
     self.header_button4 = Button(master, text='Kapat', width=20, command=master.destroy)
     self.header_button4.grid(row=3, column=4, sticky='w')
@@ -133,12 +133,12 @@ class MainWindow:
         self.hidden2 = not self.hidden2
 
 
-  def view(self):
+  def upcomingPrg(self):
     self.tree.delete(*self.tree.get_children())      
-    for row in backend.view():
+    for row in backend.getUpcomingPrg():
       self.tree.insert('', END, values=row)
 
-  def having(self):
+  def trnStdCount(self):
     self.tree2.delete(*self.tree2.get_children())       
     for row in backend.getTrnStdCount():
       self.tree2.insert('', END, values=row)
@@ -150,7 +150,7 @@ class MainWindow:
 class DatabaseWindow:
   def __init__(self, master, level_no):
     self.master = master
-    master.title('Öz Yıldız Dalış Okulu Bilgi Sistemi')
+    master.title('Öz Yıldız Dalış Okulu Bilgi Sistemi - Tablolar')
     master.geometry('800x500')
     master.grid_columnconfigure(0, minsize=60)  # set leftmost column width
     master.grid_rowconfigure(2, minsize=40)  # leave an empty row

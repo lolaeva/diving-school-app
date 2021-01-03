@@ -115,6 +115,7 @@ class Student:
     self.level_entry = '' 
     try:
       entry_values = self.getEntryValues()
+      print(entry_values)
       query = backend.insertStd(entry_values)
       messagebox.showinfo(parent=self.new_window, title='Success', message=query)
       self.viewStd()        # update table view
@@ -202,11 +203,11 @@ class Student:
     self.level_entry = OptionMenu(self.new_window, self.level_text, levels[0], *levels)
     self.level_entry.grid(row=5, column=2, sticky="nsew")
     # refno
-    l5 = Label(self.new_window, text='Referans Egitmen: ').grid(row=6, column=1, sticky='w')
+    l5 = Label(self.new_window, text='Referans Egitmen-seviyesi:').grid(row=6, column=1, sticky='w')
     # get trainer name and surname from dropdown menu
     trainers = backend.getTrnName()
     self.refno_text = StringVar(self.new_window)
-    self.refno_text.set(trainers[0]) # default value
-    self.refno_entry = OptionMenu(self.new_window, self.refno_text, trainers[0], *trainers)
+    self.refno_text.set('None') # default value
+    self.refno_entry = OptionMenu(self.new_window, self.refno_text, 'None', *trainers)
     self.refno_entry.grid(row=6, column=2, sticky="nsew")
     

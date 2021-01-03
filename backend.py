@@ -2,15 +2,14 @@
 connects to PostgreSQL database and returns queries
 in functions which are then called in script.py
 Requirements are in:
- * VIEW     -
+ * VIEW     - view
  * EXCEPT   - noGrpStd
- * HAVING   -
- * Function 1 - 
- * Function 2 - 
- * Function 3 - with cursor
- * Trigger 1  - 
- * Trigger 2  -
-
+ * HAVING   - getTrnStdCount
+ * Function 1 - deleteTrn
+ * Function 2 - getTrnNameSalary
+ * Function 3 with cursor - getTotalPrice
+ * Trigger 1 before insert or update - insertGrpStd 
+ * Trigger 2 after insert - insertGrpStd
 '''
 import os
 import psycopg2
@@ -23,13 +22,13 @@ DATABASE_URL = "dbname='dalis_okulu_vt' user='postgres' password='postgres123' h
 ''' **************************************************************************************
     ************************* MAIN WINDOW VIEW and HAVING *********************************
 '''
-def view():
+def getUpcomingPrg():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = "SELECT grup_id, program_adi, gun, egitmeni FROM yaklasan_etkinlikler\
+  query = "SELECT * FROM yaklasan_etkinlikler\
           WHERE gun_rakam IN %s ORDER BY gun_rakam;"
   today = datetime.datetime.today().weekday()
-  next_days = (str(today), str((today+1)%7), str((today+2)%7))
+  next_days = (str(today), str((today+1)%7), str((today+2)%7)) # modulo 7 because of cycle
   cur.execute(query, (next_days,))
   rows = cur.fetchall()
   conn.commit()
@@ -69,10 +68,9 @@ def deleteStd(tc):
   cur = conn.cursor()
   query = 'DELETE FROM ogrenci WHERE tc_kimlik_no=%s'
   cur.execute(query, (tc,))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Ogrenci Silindi'
 
 def getTrnNo(fname,lname):
   conn = psycopg2.connect(DATABASE_URL)
@@ -80,7 +78,6 @@ def getTrnNo(fname,lname):
   query = 'SELECT tc_kimlik_no FROM egitmen WHERE ad=%s AND soyad=%s'
   cur.execute(query, (fname,lname))
   res = cur.fetchall()
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
   return res[0][0]
@@ -92,27 +89,25 @@ def updateStd(std):
            SET tc_kimlik_no=%s, ad=%s, soyad=%s, dogum_tarihi=%s, seviye=%s, referans_no=%s \
            WHERE tc_kimlik_no=%s'
   cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[0]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Ogrenci Bilgisi Guncellendi'
 
 def getTrnName():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'SELECT ad, soyad FROM egitmen'
+  query = 'SELECT ad, soyad, seviye FROM egitmen ORDER BY 1, 2, 3'
   cur.execute(query,())
   rows = cur.fetchall()
   conn.commit()
   conn.close()
-  return [f'{a} {b}' for a,b in rows] 
+  return [f'{a} {b} - {c}' for a,b,c in rows] 
 
 def getStdLevel():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   query = 'SELECT DISTINCT seviye FROM ogrenci ORDER BY seviye'
   cur.execute(query,())
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   rows = cur.fetchall()
   conn.commit()
   conn.close()
@@ -123,10 +118,9 @@ def insertStd(std):
   cur = conn.cursor()
   query = 'INSERT INTO ogrenci VALUES(%s,%s,%s,%s,%s,(SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s))'
   cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[6]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  # return message
+  return 'Ogrenci Eklendi ve Bilgileri Kaydedildi'
 
 ''' *********************************************************************************************
      ********************************** TRAINER *************************************************
@@ -216,10 +210,10 @@ def updatePrg(prg):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   prg = [None if len(i) < 0 or i == 'None' else i for i in prg]
-  query = 'UPDATE program SET program_id=%s, program_adi=%s, ucret=%s,\
+  query = 'UPDATE program SET program_adi=%s, ucret=%s,\
            min_egt_seviye=%s, min_ogr_seviye=%s\
-           WHERE program_id=%s'
-  cur.execute(query, (prg[0],prg[1],prg[2],prg[3],prg[4],prg[0]))
+           WHERE program_adi=%s'
+  cur.execute(query, (prg[0],prg[1],prg[2],prg[3],prg[0]))
   conn.commit()
   conn.close()
   return 'Program Guncellendi'
@@ -228,8 +222,9 @@ def insertPrg(prg):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   prg = [i if len(i)>0 or i!='None' else None for i in prg]
-  query = 'INSERT INTO program VALUES(%s,%s,%s,%s,%s)'
-  cur.execute(query, (prg[0],prg[1],prg[2],prg[3],prg[4]))
+  print(prg)
+  query = 'INSERT INTO program (program_adi, ucret, min_egt_seviye, min_ogr_seviye) VALUES(%s,%s,%s,%s)'
+  cur.execute(query, (prg[0],prg[1],prg[2],prg[3]))
   conn.commit()
   conn.close()
   return 'Program Eklendi'
@@ -257,13 +252,15 @@ def getTotalPrice(prg_id):
   return res
 
 ''' *****************************************************************************************************
-    ******************************************* GRUP ***************************************************
+    ******************************************* GROUP ***************************************************
 '''
 def showGrp():
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'SELECT grup_id, program_id, egitmen_no, gun\
-           FROM grup ORDER BY grup_id'
+  query = 'SELECT g.grup_id, p.program_adi, egitmen_no, gun, COUNT(ogrenci_no)\
+          FROM grup g JOIN program p USING(program_id)\
+          LEFT JOIN grup_ogr USING(grup_id)\
+          GROUP BY 1, 2 ORDER BY 1;'
   cur.execute(query)
   rows = cur.fetchall()
   conn.commit()
@@ -293,8 +290,9 @@ def insertGrp(grp):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   grp = [i if len(i)>0 or i!='None' else None for i in grp]
-  query = 'INSERT INTO grup VALUES(%s,%s,(SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s),%s)'
-  cur.execute(query, (grp[0], grp[1], grp[3], grp[4], grp[2]))
+  query = 'INSERT INTO grup (program_id, egitmen_no, gun) VALUES((SELECT program_id FROM program p WHERE p.program_adi=%s), \
+            (SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s),%s)'
+  cur.execute(query, (grp[0], grp[2], grp[3], grp[1]))
   conn.commit()
   conn.close()
   return 'Grup Eklendi'
@@ -308,11 +306,10 @@ def getTrnNameSalary(grp_id):
   res = cur.fetchall()
   query1 = 'SELECT EGITMEN_MAAS(%s);'
   cur.execute(query1, (str(res[0][0]),))
-  salary = cur.fetchall()
-  msg = conn.notices[0]
+  name_salary = cur.fetchone()
   conn.commit()
   conn.close()
-  return msg[9:]
+  return name_salary[0][1:-1] # eliminate parantheses
 
 def getPrgName(grp_id):
   conn = psycopg2.connect(DATABASE_URL)
@@ -324,6 +321,16 @@ def getPrgName(grp_id):
   conn.commit()
   conn.close()
   return res[0]
+
+def getAllPrgName():
+  conn = psycopg2.connect(DATABASE_URL)
+  cur = conn.cursor()
+  query = 'SELECT program_adi FROM program'
+  cur.execute(query)
+  res = cur.fetchall()
+  conn.commit()
+  conn.close()
+  return [i[0] for i in res]
 
 
 ''' ****************************************************************************************************
@@ -345,9 +352,10 @@ def insertGrpStd(grp_std):
   cur = conn.cursor()
   query = 'INSERT INTO grup_ogr VALUES(%s,(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s))'
   cur.execute(query, (grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1]))
-  message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
+  message = conn.notices[0][7:-1] 
   conn.commit()
   conn.close()
+  print(message)
   return message
 
 def deleteGrpStd(id, fname, lname):
@@ -367,10 +375,9 @@ def updateGrpStd(grp_std):
   query = 'UPDATE grup_ogr SET grup_id=%s, ogrenci_no=(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s) \
           WHERE grup_id=%s AND ogrenci_no=(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s)'
   cur.execute(query, (grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1], grp_std[2], grp_std[3], grp_std[4]))
-  # message = conn.notices[0][7:-1]  # get sql notice. sql notice output is ['NOTICE: -some message- \n']
   conn.commit()
   conn.close()
-  return 'Grup Ogrenci Yenilendi'
+  return 'Grup Ogrenci Guncellendi'
 
 def noGrpStd():
   conn = psycopg2.connect(DATABASE_URL)

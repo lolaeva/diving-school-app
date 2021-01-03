@@ -18,20 +18,23 @@ class Group:
     self.buttons = [b1, b2, b3]
     i1 = Label(master, text='Dahil Oldugu Program: ')
     self.t1 = Label(master, text='')
+    i2 = Label(master, text='Egitmeni ve maasi: ')
     self.t2 = Label(master, text='')
-    self.infos = [i1,self.t1,self.t2]
+    self.infos = [i1,self.t1, i2, self.t2]
     # TREEVIEW
-    self.tree_title = Label(master, text='Ogrenciler')
+    self.tree_title = Label(master, text='Gruplar')
     self.tree = Treeview(master, show='headings')
-    self.tree['columns'] = ("1", "2", "3", "4") 
-    self.tree.heading('#1', text='Grup ID')
-    self.tree.heading('#2', text='Program ID')
+    self.tree['columns'] = ("1", "2", "3", "4", "5") 
+    self.tree.heading('#1', text='Grup No')
+    self.tree.heading('#2', text='Program No')
     self.tree.heading('#3', text='Egitmen No')
     self.tree.heading('#4', text='Gun')
-    self.tree.column('1', width = 60)
-    self.tree.column('2', width = 60)
+    self.tree.heading('#5', text='Ogrenci Sayisi')
+    self.tree.column('1', width = 20)
+    self.tree.column('2', width = 20)
     self.tree.column('3', width = 60)
     self.tree.column('4', width = 60)
+    self.tree.column('5', width = 20)
     self.style_tree = Style()
     self.style_tree.configure('Treeview', rowheight=20)
     # on row selection, bind elements in row to content function
@@ -48,18 +51,17 @@ class Group:
 
   def toggle(self, buttons, tree_win, infos):
     if self.hidden:
-      tree_win[0].grid(row=6, column=1, columnspan=6, rowspan=4, sticky='nsew')
+      tree_win[0].grid(row=6, column=1, columnspan=5, rowspan=4, sticky='nsew')
       tree_win[1].grid(row=2, column=1, sticky='sw')
       tree_win[2].grid(row=6, column=6, sticky='ns')
       for i in range(3):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
-      for i in range(2):
+      for i in range(4):
         infos[i].grid(row=4, column=i+1, sticky='w')
-      infos[2].grid(row=5, column=1, columnspan=3, sticky='w')
     else:
       for i in range(3):
         buttons[i].grid_remove()
-      for i in range(3):
+      for i in range(4):
         infos[i].grid_remove()
       tree_win[0].grid_remove()
       tree_win[1].grid_remove()
@@ -84,33 +86,26 @@ class Group:
     # get row values on selection
     current_item = self.tree.item(self.tree.focus())
     self.grp_id = current_item['values'][0]
-    self.prg_id = current_item['values'][1]
+    self.prg_name = current_item['values'][1]
     self.trn_no = current_item['values'][2]
     self.day = current_item['values'][3]
-    # grp_trn = ' '.join(list(backend.showGrpInfo(self.grp_id)))
-    self.t2.config(text = backend.getTrnNameSalary(self.grp_id))
+    grp_trn = backend.getTrnNameSalary(self.grp_id).split(',')
     self.t1.config(text=backend.getPrgName(self.grp_id))
+    self.t2.config(text = f'{grp_trn[0]} {grp_trn[1]} - {grp_trn[2]}')
 
   def fillEntries(self):
     if not self.checkSelectResult:
       return 0
-    # insert selected row values (from function selectRow) to entries to new window
-    self.grp_id_entry.insert(0, self.grp_id)
-    self.prg_id_entry.insert(0, self.prg_id)
-    self.trn_no_entry.insert(0, self.trn_no)
     self.day_entry.insert(0, self.day)
 
   def getEntryValues(self):
-    grp_id = self.grp_id_text.get()
-    prg_id = self.prg_id_text.get()
+    p = self.prg_name_text.get()
     trn_fname = self.trn_no_text.get().split()[0]
     trn_lname = self.trn_no_text.get().split()[1]
     day = self.day_text.get()
-    return [grp_id, prg_id, day, trn_fname, trn_lname]
+    return [p, day, trn_fname, trn_lname]
 
   def insertGrp(self):
-    self.grp_id_entry = ''
-    self.prg_id_entry = ''
     self.day_entry    = ''
     try:
       entry_values = self.getEntryValues()
@@ -172,26 +167,22 @@ class Group:
       b1 = Button(self.new_window, text='Yenile', width=20, command=self.updateGrp).grid(row=7, column=1, sticky='nsew')
       b2 = Button(self.new_window, text='Iptal', width=20, command=self.new_window.destroy).grid(row=7, column=2, sticky='nsew')
 
-    # GROUP ID
-    l1 = Label(self.new_window, text='Group ID: ').grid(row=1, column=1, sticky='w')
-    self.grp_id_text=StringVar()
-    self.grp_id_entry = Entry(self.new_window, textvariable=self.grp_id_text, width=entry_width)
-    self.grp_id_entry.grid(row=1, column=2, sticky="nsew") 
     # PROGRAM ID
-    l2 = Label(self.new_window, text='Program ID: ').grid(row=2, column=1, sticky='w')
-    self.prg_id_text=StringVar()
-    self.prg_id_entry = Entry(self.new_window,textvariable=self.prg_id_text,width=entry_width)
-    self.prg_id_entry.grid(row=2, column=2, sticky="nsew")
+    l2 = Label(self.new_window, text='Programi: ').grid(row=1, column=1, sticky='w')
+    programs = backend.getAllPrgName()
+    self.prg_name_text=StringVar(self.new_window)
+    self.prg_name_text.set('Seciniz')
+    self.prg_name_entry = OptionMenu(self.new_window, self.prg_name_text, 'Seciniz', *programs)
+    self.prg_name_entry.grid(row=1, column=2, sticky="nsew")
     # TRAINER
-    l3 = Label(self.new_window, text='Egitmen No: ').grid(row=3, column=1, sticky='w')
+    l3 = Label(self.new_window, text='Egitmeni: ').grid(row=3, column=1, sticky='w')
     trainers = backend.getTrnName()
     self.trn_no_text = StringVar(self.new_window)
-    self.trn_no_text.set(trainers[0])
-    self.trn_no_entry = OptionMenu(self.new_window, self.trn_no_text, trainers[0], *trainers)
+    self.trn_no_text.set('Seciniz')
+    self.trn_no_entry = OptionMenu(self.new_window, self.trn_no_text, 'Seciniz', *trainers)
     self.trn_no_entry.grid(row=3, column=2, sticky="nsew")
     # DAY OF WEEK
     l4 = Label(self.new_window, text='Gun: ').grid(row=4, column=1, sticky='w')
     self.day_text=StringVar()
     self.day_entry = Entry(self.new_window,textvariable=self.day_text,width=entry_width)
     self.day_entry.grid(row=4, column=2, sticky="nsew")
-   

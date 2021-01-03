@@ -13,10 +13,9 @@ class GroupStd:
     master.grid_rowconfigure(4, minsize=30) 
     b_width = 20
     b1 = Button(master, text='Ekle', width=b_width, command=lambda: self.openGrpStdWindow(1))
-    b2 = Button(master, text='Guncelle', width=b_width, command=lambda: self.openGrpStdWindow(2))
-    b3 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteGrpStd())
+    b2 = Button(master, text='Sil', width=b_width, command=lambda: self.deleteGrpStd())
 
-    self.buttons = [b1, b2, b3]
+    self.buttons = [b1,b2]
     i1 = Label(master, text='Ogrenci Sayisi: ')
     self.t1 = Label(master, text='')
     i2 = Label(master, text='Ogrenci: ')
@@ -42,7 +41,6 @@ class GroupStd:
     self.tree.configure(yscrollcommand = self.sb.set)
     self.tree_window = [self.tree, self.tree_title, self.sb]
     
-
     self.tree2_title = Label(master, text='Grupsuz Ogrenciler')
     self.tree2 = Treeview(master, show='headings')
     self.tree2['columns'] = ("1", "2", "3", "4")
@@ -75,13 +73,13 @@ class GroupStd:
       tree2_win[0].grid(row=7, column=4, columnspan=2, rowspan=4, sticky='nsew')
       tree2_win[1].grid(row=6, column=4, sticky='sw')
       tree2_win[2].grid(row=7, column=6, sticky='nsw')
-      for i in range(3):
+      for i in range(2):
         buttons[i].grid(row=3, column=i+1, sticky='nsew')
       for i in range(2):
         infos[i].grid(row=i+4, column=2, sticky='w')
         labels[i].grid(row=i+4, column=1, sticky='w')
     else:
-      for i in range(3):
+      for i in range(2):
         buttons[i].grid_remove()
       for i in range(2):
         infos[i].grid_remove()
@@ -93,7 +91,6 @@ class GroupStd:
       tree2_win[1].grid_remove()
       tree2_win[2].grid_remove()
     self.hidden = not self.hidden
-
 
   # ******************* CHECK CONDITIONS ***************** 
   def checkSelection(self):
