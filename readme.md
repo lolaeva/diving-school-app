@@ -1,4 +1,5 @@
 # Diving School Database Frontend App with Python, Tkinter, PostgreSQL
+ This app is made for the Database Management course assignment. Language is Turkish.
 ## Folder organization:
 
 * On main page there are two python files: the first is the main file **script.py** for running the app. The second is **backend.py** providing connection of the frontend to PostgreSQL database.
