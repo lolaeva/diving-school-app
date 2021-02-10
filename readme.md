@@ -1,7 +1,23 @@
-## Diving School Database Frontend App with Python, Tkinter, PostgreSQL
-* Folder organization:
+# Diving School Database Frontend App with Python, Tkinter, PostgreSQL
+## Folder organization:
     * On main page there are two python files: the first is the main file **script.py** for running the app. The second is **backend.py** providing connection of the frontend to PostgreSQL database.
     * In the folder **app** there are other python files related to database tables. They are **student.py, program.py, group.py, trainer.py**
+
+## App screenshot samples
+#### Main page
+![01](https://user-images.githubusercontent.com/46975718/107482424-b3be7c00-6b90-11eb-98eb-09c43a0cc912.JPG)
+
+#### Instructors table - view, add, update, delete
+![eg0](https://user-images.githubusercontent.com/46975718/107482525-db154900-6b90-11eb-81b5-ad7af93dbe99.JPG)
+![eg1](https://user-images.githubusercontent.com/46975718/107482547-e2d4ed80-6b90-11eb-9002-69e6bb0bed74.JPG)
+![eg2](https://user-images.githubusercontent.com/46975718/107482550-e36d8400-6b90-11eb-87a9-e76f2fe07efa.JPG)
+![eg3](https://user-images.githubusercontent.com/46975718/107482552-e4061a80-6b90-11eb-8505-b4f257510518.JPG)
+
+#### Groups' students table - view, add, delete, triggers
+![grp_ogr0](https://user-images.githubusercontent.com/46975718/107482707-1e6fb780-6b91-11eb-9530-3ec7ba53be3a.JPG)
+![grp_ogr1](https://user-images.githubusercontent.com/46975718/107482711-1f084e00-6b91-11eb-9311-852de4680a09.JPG)
+![grp_ogr2](https://user-images.githubusercontent.com/46975718/107482712-1f084e00-6b91-11eb-9325-0031df8ada18.JPG)
+![grp_ogr5](https://user-images.githubusercontent.com/46975718/107482715-1fa0e480-6b91-11eb-80c4-a23726b2ad9e.JPG)
 
 ## Instructions on how to run the app on local:
 To run on your local machine:
