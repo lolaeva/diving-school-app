@@ -104,9 +104,12 @@ class Student:
     bdate = self.bdate_text.get()
     level = self.level_text.get()
     refname = self.refno_text.get().split()[0]
-    reflname = self.refno_text.get().split()[1]
+    if refname != 'None':
+      reflname = self.refno_text.get().split()[1]
+    else:
+      reflname = ''
     return [tc, fname, lname, bdate, level, refname, reflname]
-    
+  
   def insertStd(self):
     self.fname_entry = ''
     self.lname_entry = ''
@@ -115,7 +118,6 @@ class Student:
     self.level_entry = '' 
     try:
       entry_values = self.getEntryValues()
-      print(entry_values)
       query = backend.insertStd(entry_values)
       messagebox.showinfo(parent=self.new_window, title='Success', message=query)
       self.viewStd()        # update table view
@@ -128,9 +130,14 @@ class Student:
       try:
         entry_values = self.getEntryValues()
         std_info = entry_values[:-2]
-        ref_no = backend.getTrnNo(entry_values[-2], entry_values[-1])  # get ref no from refname
-        std_info.append(ref_no)    # add all student values to one list
-        query = backend.updateStd(std_info)
+        if entry_values[-2] != 'None':
+          ref_no = backend.getTrnNo(entry_values[-2], entry_values[-1])  # get ref no from refname
+          std_info.append(ref_no)    # add all student values to one list
+          query = backend.updateStd(std_info)
+        else:
+          ref_no = 'None'  # get ref no from refname
+          std_info.append(ref_no)    # add all student values to one list
+          query = backend.updateStd(std_info)
         messagebox.showinfo(parent=self.new_window, title='Success', message=query)
         self.viewStd()             # update table view
         self.new_window.destroy()

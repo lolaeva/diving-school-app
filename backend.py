@@ -50,8 +50,8 @@ def getTrnStdCount():
   conn.close()
   return rows
 
-''' *********************************************
-    ****************** STUDENT ******************
+''' ************************************************************************
+    ****************************** STUDENT *********************************
  '''
 def showStd():
   conn = psycopg2.connect(DATABASE_URL)
@@ -85,10 +85,16 @@ def getTrnNo(fname,lname):
 def updateStd(std):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'UPDATE ogrenci \
+  if std[-2] != 'None':
+    query = 'UPDATE ogrenci \
            SET tc_kimlik_no=%s, ad=%s, soyad=%s, dogum_tarihi=%s, seviye=%s, referans_no=%s \
            WHERE tc_kimlik_no=%s'
-  cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[0]))
+    cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[0]))
+  else:
+    query = 'UPDATE ogrenci \
+           SET tc_kimlik_no=%s, ad=%s, soyad=%s, dogum_tarihi=%s, seviye=%s, referans_no=NULL \
+           WHERE tc_kimlik_no=%s'
+    cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[0]))
   conn.commit()
   conn.close()
   return 'Ogrenci Bilgisi Guncellendi'
@@ -116,8 +122,12 @@ def getStdLevel():
 def insertStd(std):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  query = 'INSERT INTO ogrenci VALUES(%s,%s,%s,%s,%s,(SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s))'
-  cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[6]))
+  if std[-2] != 'None':
+    query = 'INSERT INTO ogrenci VALUES(%s,%s,%s,%s,%s,(SELECT e.tc_kimlik_no FROM egitmen e WHERE e.ad=%s AND e.soyad=%s))'
+    cur.execute(query, (std[0],std[1],std[2],std[3],std[4],std[5],std[6]))
+  else:
+    query = 'INSERT INTO ogrenci VALUES(%s,%s,%s,%s,%s,NULL)'
+    cur.execute(query, (std[0],std[1],std[2],std[3],std[4]))
   conn.commit()
   conn.close()
   return 'Ogrenci Eklendi ve Bilgileri Kaydedildi'
@@ -222,7 +232,6 @@ def insertPrg(prg):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
   prg = [i if len(i)>0 or i!='None' else None for i in prg]
-  print(prg)
   query = 'INSERT INTO program (program_adi, ucret, min_egt_seviye, min_ogr_seviye) VALUES(%s,%s,%s,%s)'
   cur.execute(query, (prg[0],prg[1],prg[2],prg[3]))
   conn.commit()
@@ -355,7 +364,6 @@ def insertGrpStd(grp_std):
   message = conn.notices[0][7:-1] 
   conn.commit()
   conn.close()
-  print(message)
   return message
 
 def deleteGrpStd(id, fname, lname):
@@ -371,7 +379,6 @@ def deleteGrpStd(id, fname, lname):
 def updateGrpStd(grp_std):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
-  print(grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1], grp_std[2], grp_std[3], grp_std[4])
   query = 'UPDATE grup_ogr SET grup_id=%s, ogrenci_no=(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s) \
           WHERE grup_id=%s AND ogrenci_no=(SELECT o.tc_kimlik_no FROM ogrenci o WHERE o.ad=%s AND o.soyad=%s)'
   cur.execute(query, (grp_std[0], grp_std[1].split()[0], grp_std[1].split()[1], grp_std[2], grp_std[3], grp_std[4]))
@@ -393,6 +400,7 @@ def noGrpStd():
   conn.close()
   return rows
 
+  
 def getStdCount(group_id):
   conn = psycopg2.connect(DATABASE_URL)
   cur = conn.cursor()
